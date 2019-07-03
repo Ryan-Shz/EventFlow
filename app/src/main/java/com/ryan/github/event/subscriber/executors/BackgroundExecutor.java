@@ -1,4 +1,4 @@
-package com.sc.event.subscriber.executors;
+package com.ryan.github.event.subscriber.executors;
 
 import android.support.annotation.NonNull;
 

@@ -1,6 +1,6 @@
-package com.sc.event.subscriber.annotation;
+package com.ryan.github.event.subscriber.annotation;
 
-import com.sc.event.subscriber.ThreadMode;
+import com.ryan.github.event.subscriber.ThreadMode;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -19,8 +19,10 @@ import java.lang.annotation.Target;
 public @interface Subscribe {
 
     /**
-     * 执行线程 {@link com.sc.event.subscriber.ThreadMode}
+     * 执行线程 {@link com.ryan.github.event.subscriber.ThreadMode}
      */
     int threadMode() default ThreadMode.POSTER;
+
+    int priority() default 0;
 
 }

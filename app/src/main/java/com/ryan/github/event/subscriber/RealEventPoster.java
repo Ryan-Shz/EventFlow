@@ -1,8 +1,9 @@
-package com.sc.event.subscriber;
+package com.ryan.github.event.subscriber;
 
 import android.util.Log;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
@@ -54,7 +55,7 @@ public class RealEventPoster implements IEventPoster {
         Object event = eventWrapper.postEvent;
         eventWrapper.recycle();
         Class<?> eventType = event.getClass();
-        Set<SubscribeMethod> methods = mEventFlow.getSubscribeMethods(eventType);
+        List<SubscribeMethod> methods = mEventFlow.getSubscribeMethods(eventType);
         if (methods == null || methods.isEmpty()) {
             if (BuildConfig.DEBUG) {
                 Log.v(EventFlow.TAG, "event: " + event + ", 没有被订阅");

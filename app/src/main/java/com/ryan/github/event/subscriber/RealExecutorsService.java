@@ -1,8 +1,8 @@
-package com.sc.event.subscriber;
+package com.ryan.github.event.subscriber;
 
-import com.sc.event.subscriber.executors.BackgroundExecutor;
-import com.sc.event.subscriber.executors.MainExecutor;
-import com.sc.event.subscriber.executors.PosterExecutor;
+import com.ryan.github.event.subscriber.executors.BackgroundExecutor;
+import com.ryan.github.event.subscriber.executors.MainExecutor;
+import com.ryan.github.event.subscriber.executors.PosterExecutor;
 
 import java.util.concurrent.Executor;
 

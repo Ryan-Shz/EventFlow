@@ -1,7 +1,7 @@
-package com.sc.event.subscriber;
+package com.ryan.github.event.subscriber;
 
-import com.sc.event.subscriber.utils.HashCodeUtil;
-import com.sc.event.subscriber.utils.ObjectUtil;
+import com.ryan.github.event.subscriber.utils.HashCodeUtil;
+import com.ryan.github.event.subscriber.utils.ObjectUtil;
 
 import java.lang.reflect.Method;
 
@@ -19,12 +19,14 @@ class SubscribeMethod {
     private int threadMode;
     private Class<?> eventType;
     private final int mHash;
+    private int priority;
 
-    SubscribeMethod(Object master, Method method, Class<?> eventType, int threadMode) {
+    SubscribeMethod(Object master, Method method, Class<?> eventType, int threadMode, int priority) {
         this.master = master;
         this.method = method;
         this.eventType = eventType;
         this.threadMode = threadMode;
+        this.priority = priority;
         mHash = HashCodeUtil.hashCode(master, method, eventType, threadMode);
     }
 
@@ -44,6 +46,10 @@ class SubscribeMethod {
         return eventType;
     }
 
+    public int getPriority() {
+        return priority;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null || !(obj instanceof SubscribeMethod)) {
@@ -54,6 +60,7 @@ class SubscribeMethod {
                 && ObjectUtil.equal(master, other.master)
                 && ObjectUtil.equal(method, other.method)
                 && threadMode == other.threadMode
+                && priority == other.priority
                 && ObjectUtil.equal(eventType, other.eventType);
     }
 

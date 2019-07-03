@@ -1,7 +1,7 @@
-package com.sc.event.subscriber;
+package com.ryan.github.event.subscriber;
 
-import com.sc.event.subscriber.utils.HashCodeUtil;
-import com.sc.event.subscriber.utils.ObjectUtil;
+import com.ryan.github.event.subscriber.utils.HashCodeUtil;
+import com.ryan.github.event.subscriber.utils.ObjectUtil;
 
 /**
  * created by 2018/10/16 下午7:13

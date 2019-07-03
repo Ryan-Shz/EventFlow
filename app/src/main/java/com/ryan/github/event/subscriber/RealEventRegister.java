@@ -1,14 +1,16 @@
-package com.sc.event.subscriber;
+package com.ryan.github.event.subscriber;
 
 import android.os.Looper;
 import android.support.v4.util.ArrayMap;
 import android.support.v4.util.ArraySet;
 
-import com.sc.event.subscriber.annotation.Subscribe;
+import com.ryan.github.event.subscriber.annotation.Subscribe;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -24,7 +26,7 @@ public class RealEventRegister implements IEventRegister {
     // 保存目前订阅的对象，用于快速判断是否已订阅
     private Map<Class<?>, EventSubscriber> mSubscribers;
     // 保存<事件类型-订阅方法>映射
-    private Map<Class<?>, Set<SubscribeMethod>> mTypeAndEvents;
+    private Map<Class<?>, List<SubscribeMethod>> mTypeAndEvents;
     // 保存对象和订阅方法，避免重复反射
     private Map<Class<?>, Set<SubscribeMethod>> mSubscriberMethods;
 
@@ -74,10 +76,10 @@ public class RealEventRegister implements IEventRegister {
     }
 
     @Override
-    public Set<SubscribeMethod> getSubscribeMethods(Class<?> eventType) {
-        Set<SubscribeMethod> subscribeMethods = mTypeAndEvents.get(eventType);
+    public List<SubscribeMethod> getSubscribeMethods(Class<?> eventType) {
+        List<SubscribeMethod> subscribeMethods = mTypeAndEvents.get(eventType);
         if (subscribeMethods != null) {
-            return Collections.unmodifiableSet(subscribeMethods);
+            return Collections.unmodifiableList(subscribeMethods);
         }
         return null;
     }
@@ -100,7 +102,7 @@ public class RealEventRegister implements IEventRegister {
             // 将上次反射的信息重新注册到<事件类型-事件方法>的映射列表里
             for (SubscribeMethod method : subscribeMethods) {
                 Class<?> eventType = method.getEventType();
-                Set<SubscribeMethod> cachedMethods = getEventTypeMethodsSet(eventType);
+                List<SubscribeMethod> cachedMethods = getEventTypeMethodsSet(eventType);
                 cachedMethods.add(method);
                 EventSubscriber eventSubscriber = new EventSubscriber(subscriber, subscriberClass);
                 mSubscribers.put(subscriberClass, eventSubscriber);
@@ -127,10 +129,12 @@ public class RealEventRegister implements IEventRegister {
                     // 1. 获取参数类型、线程模式
                     Class<?> eventType = parameterTypes[0];
                     int threadMode = subscribeAnnotation.threadMode();
+                    int priority = subscribeAnnotation.priority();
                     // 2. 保存到<事件类型-事件方法>集合中
-                    Set<SubscribeMethod> cachedMethods = getEventTypeMethodsSet(eventType);
-                    SubscribeMethod subscribeMethod = new SubscribeMethod(subscriber, method, eventType, threadMode);
-                    cachedMethods.add(subscribeMethod);
+                    List<SubscribeMethod> cachedMethods = getEventTypeMethodsSet(eventType);
+                    SubscribeMethod subscribeMethod = new SubscribeMethod(subscriber, method, eventType, threadMode, priority);
+                    int insertIndex = getPriorityIndex(cachedMethods, subscribeMethod);
+                    cachedMethods.add(insertIndex, subscribeMethod);
                     // 3. 缓存订阅类的订阅方法信息，反注册时不会被清空，下次注册时不需要再次反射避免性能消耗
                     subscribeMethods.add(subscribeMethod);
                     // 4. 保存订阅者，用来快速判断是否已经订阅
@@ -146,13 +150,27 @@ public class RealEventRegister implements IEventRegister {
         }
     }
 
-    private Set<SubscribeMethod> getEventTypeMethodsSet(Class<?> eventType) {
-        Set<SubscribeMethod> cachedMethods = mTypeAndEvents.get(eventType);
+    private List<SubscribeMethod> getEventTypeMethodsSet(Class<?> eventType) {
+        List<SubscribeMethod> cachedMethods = mTypeAndEvents.get(eventType);
         if (cachedMethods == null) {
-            cachedMethods = new ArraySet<>();
+            cachedMethods = new ArrayList<>();
             mTypeAndEvents.put(eventType, cachedMethods);
         }
         return cachedMethods;
+    }
+
+    private int getPriorityIndex(List<SubscribeMethod> cachedMethods, SubscribeMethod insertMethod) {
+        int priority = insertMethod.getPriority();
+        int insertIndex = 0;
+        for (int i = 0; i < cachedMethods.size(); i++) {
+            SubscribeMethod curr = cachedMethods.get(i);
+            if (curr.getPriority() >= priority) {
+                insertIndex++;
+            } else {
+                break;
+            }
+        }
+        return insertIndex;
     }
 
 }

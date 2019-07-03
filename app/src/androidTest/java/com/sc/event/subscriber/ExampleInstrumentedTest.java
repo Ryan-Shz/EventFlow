@@ -1,4 +1,4 @@
-package com.sc.event.subscriber;
+package com.ryan.github.event.subscriber;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -22,7 +22,7 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.sc.event.subscriber", appContext.getPackageName());
+        assertEquals("com.ryan.github.event.subscriber", appContext.getPackageName());
     }
 
 }

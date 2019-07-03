@@ -1,6 +1,6 @@
-package com.sc.event.subscriber;
+package com.ryan.github.event.subscriber;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * created by 2018/10/16 下午5:18
@@ -33,6 +33,6 @@ public interface IEventRegister {
      */
     boolean isRegister(Object subscriber);
 
-    Set<SubscribeMethod> getSubscribeMethods(Class<?> eventType);
+    List<SubscribeMethod> getSubscribeMethods(Class<?> eventType);
 
 }

@@ -1,4 +1,4 @@
-package com.sc.event.subscriber.utils;
+package com.ryan.github.event.subscriber.utils;
 
 /**
  * created by 2018/10/16 下午10:48

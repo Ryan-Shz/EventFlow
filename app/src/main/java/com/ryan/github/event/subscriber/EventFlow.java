@@ -1,6 +1,6 @@
-package com.sc.event.subscriber;
+package com.ryan.github.event.subscriber;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * created by 2018/10/16 下午5:09
@@ -49,7 +49,7 @@ public class EventFlow implements IEventRegister, IEventPoster {
     }
 
     @Override
-    public Set<SubscribeMethod> getSubscribeMethods(Class<?> eventType) {
+    public List<SubscribeMethod> getSubscribeMethods(Class<?> eventType) {
         return mRegister.getSubscribeMethods(eventType);
     }
 

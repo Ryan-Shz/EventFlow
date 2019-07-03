@@ -7,19 +7,20 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.sc.event.subscriber.EventFlow;
-import com.sc.event.subscriber.R;
-import com.sc.event.subscriber.ThreadMode;
-import com.sc.event.subscriber.annotation.Subscribe;
+import com.ryan.github.event.subscriber.EventFlow;
+import com.ryan.github.event.subscriber.R;
+import com.ryan.github.event.subscriber.ThreadMode;
+import com.ryan.github.event.subscriber.annotation.Subscribe;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = EventFlow.class.getSimpleName();
+    private MultipleEventTestClass mMultipleEventTestClass;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mMultipleEventTestClass = new MultipleEventTestClass();
         Button registerButton = findViewById(R.id.register_btn);
         Button postButton = findViewById(R.id.post_btn);
         Button unRegisterButton = findViewById(R.id.unregister_btn);
@@ -84,16 +85,18 @@ public class MainActivity extends AppCompatActivity {
     public void registerEventFlow() {
         EventFlow subscriber = EventFlow.getInstance();
         subscriber.register(this);
+        mMultipleEventTestClass.register();
     }
 
     public void unRegisterEventFlow() {
         EventFlow subscriber = EventFlow.getInstance();
         subscriber.unRegister(this);
+        mMultipleEventTestClass.unRegister();
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
+    @Subscribe(threadMode = ThreadMode.MAIN, priority = 1)
     public void onEvent(TestEvent event) {
-        Log.v(TAG, "receive event! " + event + ", event id: " + event.id);
+        Log.v(Constants.TAG, getClass().getSimpleName() + " receive event! " + event + ", event id: " + event.id);
         Toast.makeText(this, "receive event!", Toast.LENGTH_LONG).show();
     }
 }

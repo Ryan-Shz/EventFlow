@@ -1,4 +1,4 @@
-package com.sc.event.subscriber.utils;
+package com.ryan.github.event.subscriber.utils;
 
 import android.support.annotation.Nullable;
 

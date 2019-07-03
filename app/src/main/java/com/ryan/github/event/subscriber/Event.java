@@ -1,4 +1,4 @@
-package com.sc.event.subscriber;
+package com.ryan.github.event.subscriber;
 
 import android.support.v4.util.Pools;
 
