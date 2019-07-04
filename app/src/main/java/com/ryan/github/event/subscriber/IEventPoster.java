@@ -17,4 +17,13 @@ public interface IEventPoster {
      */
     boolean post(Object event);
 
+    void postSticky(Object event);
+
+    void stickyToAll();
+
+    void removeStickyEvent(Object event);
+
+    void removeAllStickyEvents();
+
+    void removeStickyEvent(Class<?> eventType);
 }

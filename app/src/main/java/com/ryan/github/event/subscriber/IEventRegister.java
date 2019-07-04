@@ -35,4 +35,6 @@ public interface IEventRegister {
 
     List<SubscribeMethod> getSubscribeMethods(Class<?> eventType);
 
+    List<SubscribeMethod> getStickySubscribeMethods(Class<?> eventType);
+
 }

@@ -1,5 +1,6 @@
 package test;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,16 +22,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mMultipleEventTestClass = new MultipleEventTestClass();
-        Button registerButton = findViewById(R.id.register_btn);
         Button postButton = findViewById(R.id.post_btn);
-        Button unRegisterButton = findViewById(R.id.unregister_btn);
         Button postSingleButton = findViewById(R.id.post_single_btn);
-        registerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                registerEventFlow();
-            }
-        });
+        Button sticky_test_btn = findViewById(R.id.sticky_test_btn);
+        Button removeStickyBtn = findViewById(R.id.remove_sticky_btn);
+        registerEventFlow();
+        EventFlow.getInstance().postSticky(new TestEvent());
         postSingleButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -43,10 +40,16 @@ public class MainActivity extends AppCompatActivity {
                 postEvent();
             }
         });
-        unRegisterButton.setOnClickListener(new View.OnClickListener() {
+        sticky_test_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                unRegisterEventFlow();
+                startActivity(new Intent(v.getContext(), StickyTestActivity.class));
+            }
+        });
+        removeStickyBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EventFlow.getInstance().removeStickyEvent(TestEvent.class);
             }
         });
     }

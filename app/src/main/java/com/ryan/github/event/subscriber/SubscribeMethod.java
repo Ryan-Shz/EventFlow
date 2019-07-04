@@ -20,13 +20,15 @@ class SubscribeMethod {
     private Class<?> eventType;
     private final int mHash;
     private int priority;
+    private boolean isSticky;
 
-    SubscribeMethod(Object master, Method method, Class<?> eventType, int threadMode, int priority) {
+    SubscribeMethod(Object master, Method method, Class<?> eventType, int threadMode, int priority, boolean isSticky) {
         this.master = master;
         this.method = method;
         this.eventType = eventType;
         this.threadMode = threadMode;
         this.priority = priority;
+        this.isSticky = isSticky;
         mHash = HashCodeUtil.hashCode(master, method, eventType, threadMode);
     }
 
@@ -61,6 +63,7 @@ class SubscribeMethod {
                 && ObjectUtil.equal(method, other.method)
                 && threadMode == other.threadMode
                 && priority == other.priority
+                && isSticky == other.isSticky
                 && ObjectUtil.equal(eventType, other.eventType);
     }
 

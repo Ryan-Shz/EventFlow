@@ -1,10 +1,13 @@
 package com.ryan.github.event.subscriber;
 
+import android.support.v4.util.ArrayMap;
 import android.util.Log;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.concurrent.Executor;
 
 /**
@@ -24,15 +27,21 @@ public class RealEventPoster implements IEventPoster {
     private EventFlow mEventFlow;
     private ExecutorsService mService;
     private ThreadLocal<PendingEventState> mThreadLocal;
+    private final Map<Class<?>, List<Object>> mStickyEventPool;
 
     RealEventPoster(EventFlow eventFlow) {
         mEventFlow = eventFlow;
         mService = new RealExecutorsService();
         mThreadLocal = new ThreadLocal<>();
+        mStickyEventPool = new ArrayMap<>();
     }
 
     @Override
     public boolean post(Object event) {
+        return post(event, false);
+    }
+
+    private boolean post(Object event, boolean isSticky) {
         PendingEventState state = mThreadLocal.get();
         if (state == null) {
             state = new PendingEventState();
@@ -44,18 +53,70 @@ public class RealEventPoster implements IEventPoster {
         if (!isPosting) {
             state.setPosting(true);
             while ((eventWrapper = state.next()) != null) {
-                postSingleEvent(eventWrapper);
+                postSingleEvent(eventWrapper, isSticky);
             }
             state.setPosting(false);
         }
         return true;
     }
 
-    private void postSingleEvent(Event eventWrapper) {
+    @Override
+    public void postSticky(Object event) {
+        Class eventClass = event.getClass();
+        synchronized (mStickyEventPool) {
+            List<Object> eventsList = mStickyEventPool.get(eventClass);
+            if (eventsList == null) {
+                eventsList = new ArrayList<>();
+                mStickyEventPool.put(eventClass, eventsList);
+            }
+            eventsList.add(event);
+        }
+        post(event, true);
+    }
+
+    @Override
+    public void stickyToAll() {
+        synchronized (mStickyEventPool) {
+            for (Map.Entry<Class<?>, List<Object>> entry : mStickyEventPool.entrySet()) {
+                List<Object> eventsList = entry.getValue();
+                for (Object event : eventsList) {
+                    post(event, true);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void removeStickyEvent(Object event) {
+        Class eventClass = event.getClass();
+        synchronized (mStickyEventPool) {
+            List<Object> eventsList = mStickyEventPool.get(eventClass);
+            if (eventsList != null && !eventsList.isEmpty()) {
+                eventsList.remove(event);
+            }
+        }
+    }
+
+    @Override
+    public void removeAllStickyEvents() {
+        synchronized (mStickyEventPool) {
+            mStickyEventPool.clear();
+        }
+    }
+
+    @Override
+    public void removeStickyEvent(Class<?> eventType) {
+        synchronized (mStickyEventPool) {
+            mStickyEventPool.remove(eventType);
+        }
+    }
+
+    private void postSingleEvent(Event eventWrapper, boolean isSticky) {
         Object event = eventWrapper.postEvent;
         eventWrapper.recycle();
         Class<?> eventType = event.getClass();
-        List<SubscribeMethod> methods = mEventFlow.getSubscribeMethods(eventType);
+        List<SubscribeMethod> methods = isSticky ? mEventFlow.getStickySubscribeMethods(eventType)
+                : mEventFlow.getSubscribeMethods(eventType);
         if (methods == null || methods.isEmpty()) {
             if (BuildConfig.DEBUG) {
                 Log.v(EventFlow.TAG, "event: " + event + ", 没有被订阅");

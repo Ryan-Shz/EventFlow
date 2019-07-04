@@ -29,11 +29,13 @@ public class RealEventRegister implements IEventRegister {
     private Map<Class<?>, List<SubscribeMethod>> mTypeAndEvents;
     // 保存对象和订阅方法，避免重复反射
     private Map<Class<?>, Set<SubscribeMethod>> mSubscriberMethods;
+    private Map<Class<?>, List<SubscribeMethod>> mStickyMethods;
 
     RealEventRegister() {
         mTypeAndEvents = new ArrayMap<>();
         mSubscriberMethods = new ArrayMap<>();
         mSubscribers = new ArrayMap<>();
+        mStickyMethods = new ArrayMap<>();
     }
 
     @Override
@@ -64,7 +66,8 @@ public class RealEventRegister implements IEventRegister {
         // 2. 将该对象所有订阅方法从订阅方法集合中移除
         for (SubscribeMethod subscribeMethod : subscribeMethods) {
             Class<?> eventType = subscribeMethod.getEventType();
-            mTypeAndEvents.remove(eventType);
+            List<SubscribeMethod> methods = mTypeAndEvents.get(eventType);
+            methods.remove(subscribeMethod);
         }
     }
 
@@ -78,6 +81,15 @@ public class RealEventRegister implements IEventRegister {
     @Override
     public List<SubscribeMethod> getSubscribeMethods(Class<?> eventType) {
         List<SubscribeMethod> subscribeMethods = mTypeAndEvents.get(eventType);
+        if (subscribeMethods != null) {
+            return Collections.unmodifiableList(subscribeMethods);
+        }
+        return null;
+    }
+
+    @Override
+    public List<SubscribeMethod> getStickySubscribeMethods(Class<?> eventType) {
+        List<SubscribeMethod> subscribeMethods = mStickyMethods.get(eventType);
         if (subscribeMethods != null) {
             return Collections.unmodifiableList(subscribeMethods);
         }
@@ -109,7 +121,7 @@ public class RealEventRegister implements IEventRegister {
             }
             return;
         }
-        // 没有反射缓存信息，执行发射
+        // 没有反射缓存信息，执行反射
         Method[] methods = subscriberClass.getDeclaredMethods();
         subscribeMethods = new ArraySet<>();
         mSubscriberMethods.put(subscriberClass, subscribeMethods);
@@ -130,11 +142,18 @@ public class RealEventRegister implements IEventRegister {
                     Class<?> eventType = parameterTypes[0];
                     int threadMode = subscribeAnnotation.threadMode();
                     int priority = subscribeAnnotation.priority();
+                    boolean isSticky = subscribeAnnotation.sticky();
                     // 2. 保存到<事件类型-事件方法>集合中
-                    List<SubscribeMethod> cachedMethods = getEventTypeMethodsSet(eventType);
-                    SubscribeMethod subscribeMethod = new SubscribeMethod(subscriber, method, eventType, threadMode, priority);
-                    int insertIndex = getPriorityIndex(cachedMethods, subscribeMethod);
-                    cachedMethods.add(insertIndex, subscribeMethod);
+                    SubscribeMethod subscribeMethod = new SubscribeMethod(subscriber, method, eventType, threadMode, priority, isSticky);
+                    if (isSticky) {
+                        List<SubscribeMethod> cachedMethods = getStickyMethodList(eventType);
+                        int insertIndex = getPriorityIndex(cachedMethods, subscribeMethod);
+                        cachedMethods.add(insertIndex, subscribeMethod);
+                    } else {
+                        List<SubscribeMethod> cachedMethods = getEventTypeMethodsSet(eventType);
+                        int insertIndex = getPriorityIndex(cachedMethods, subscribeMethod);
+                        cachedMethods.add(insertIndex, subscribeMethod);
+                    }
                     // 3. 缓存订阅类的订阅方法信息，反注册时不会被清空，下次注册时不需要再次反射避免性能消耗
                     subscribeMethods.add(subscribeMethod);
                     // 4. 保存订阅者，用来快速判断是否已经订阅
@@ -155,6 +174,15 @@ public class RealEventRegister implements IEventRegister {
         if (cachedMethods == null) {
             cachedMethods = new ArrayList<>();
             mTypeAndEvents.put(eventType, cachedMethods);
+        }
+        return cachedMethods;
+    }
+
+    public List<SubscribeMethod> getStickyMethodList(Class<?> eventType) {
+        List<SubscribeMethod> cachedMethods = mStickyMethods.get(eventType);
+        if (cachedMethods == null) {
+            cachedMethods = new ArrayList<>();
+            mStickyMethods.put(eventType, cachedMethods);
         }
         return cachedMethods;
     }

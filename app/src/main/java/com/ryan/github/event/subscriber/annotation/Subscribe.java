@@ -25,4 +25,5 @@ public @interface Subscribe {
 
     int priority() default 0;
 
+    boolean sticky() default false;
 }

@@ -34,8 +34,34 @@ public class EventFlow implements IEventRegister, IEventPoster {
     }
 
     @Override
+    public void postSticky(Object event) {
+        mPoster.postSticky(event);
+    }
+
+    @Override
+    public void stickyToAll() {
+        mPoster.stickyToAll();
+    }
+
+    @Override
+    public void removeStickyEvent(Object event) {
+        mPoster.removeStickyEvent(event);
+    }
+
+    @Override
+    public void removeAllStickyEvents() {
+        mPoster.removeAllStickyEvents();
+    }
+
+    @Override
+    public void removeStickyEvent(Class<?> eventType) {
+        mPoster.removeStickyEvent(eventType);
+    }
+
+    @Override
     public void register(Object subscriber) {
         mRegister.register(subscriber);
+        stickyToAll();
     }
 
     @Override
@@ -51,6 +77,11 @@ public class EventFlow implements IEventRegister, IEventPoster {
     @Override
     public List<SubscribeMethod> getSubscribeMethods(Class<?> eventType) {
         return mRegister.getSubscribeMethods(eventType);
+    }
+
+    @Override
+    public List<SubscribeMethod> getStickySubscribeMethods(Class<?> eventType) {
+        return mRegister.getStickySubscribeMethods(eventType);
     }
 
 }

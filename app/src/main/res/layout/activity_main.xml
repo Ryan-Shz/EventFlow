@@ -7,30 +7,31 @@
     tools:context="test.MainActivity">
 
     <Button
-        android:id="@+id/register_btn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="register" />
-
-    <Button
         android:id="@+id/post_single_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Post Single Event"
-        app:layout_constraintTop_toBottomOf="@+id/register_btn" />
+        android:text="post single event"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/post_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="post"
+        android:text="post multiple event"
         app:layout_constraintTop_toBottomOf="@id/post_single_btn" />
 
     <Button
-        android:id="@+id/unregister_btn"
+        android:id="@+id/sticky_test_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="UnRegister"
+        android:text="sticky event test"
         app:layout_constraintTop_toBottomOf="@+id/post_btn" />
+
+    <Button
+        android:id="@+id/remove_sticky_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="remove sticky event"
+        app:layout_constraintTop_toBottomOf="@+id/sticky_test_btn" />
 
 </android.support.constraint.ConstraintLayout>
